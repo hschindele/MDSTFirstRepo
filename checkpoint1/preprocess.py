@@ -17,25 +17,36 @@ Once you are finished with this program, you should run `python preprocess.py` f
 This should load the data, perform preprocessing, and save the output to the data folder.
 
 """
-
+import pandas as pd
+import preprocess
 def remove_percents(df, col):
+    df[col] = df[col].str.replace('%', '')
+    df[col] = pd.to_numeric(df[col])
     return df
 
 def fill_zero_iron(df):
+    df['Iron (% DV)'] = df['Iron (% DV)'].fillna(0)
     return df
     
 def fix_caffeine(df):
+    mean = df[df['Caffeine (mg)'] != 0].mean()
+    df['Caffeine (mg)'] = df['Caffeine (mg)'].fillna(0)
+    df['Caffeine (mg)'] = df['Caffeine (mg)'].str.replace('[Varies,varies]', str(mean))
     return df
 
 def standardize_names(df):
+    df.columns = map(str.lower, df.columns)
+    df.columns = df.columns.str.replace(r"\(.*\)","")
     return df
 
 def fix_strings(df, col):
+    df[col] = df[col].str.replace('_', ' ')
+    df[col] = df[col].str.replace('[^a-zA-Z,^" "]', '')
+    df[col] = df[col].str.lower()
     return df
 
 
 def main():
-    
     # first, read in the raw data
     df = pd.read_csv('../data/starbucks.csv')
     
@@ -66,6 +77,7 @@ def main():
     
     # now that the data is all clean, save your output to the `data` folder as 'starbucks_clean.csv'
     # you will use this file in checkpoint 2
+    df.to_csv(r'../data/starbucks_clean.csv', index = False)
     
     
 
